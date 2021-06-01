@@ -18,7 +18,7 @@ function calculatePriceAndDeadline(
     const deadlineDate = findDeadline(day, month, hours, minutes, time);
     output = `The price is ${
       countPrice(length, language) * 1
-    }₴. Deadline is on ${deadlineDate.format("MMMM DD ddd, [at] HH:mm a")}`;
+    }₴. Deadline is on ${deadlineDate}`;
     console.log(output);
   } else {
     const time = (countDeadline(length, language) * 1.2).toFixed(0);
@@ -26,7 +26,7 @@ function calculatePriceAndDeadline(
     const deadlineDate = findDeadline(day, month, hours, minutes, time);
     output = `The price is ${
       countPrice(length, language) * 1.2
-    }₴. Deadline is on ${deadlineDate.format("MMMM DD ddd, [at] HH:mm a")}`;
+    }₴. Deadline is on ${deadlineDate}`;
     console.log(output);
   }
   return output;
@@ -34,18 +34,22 @@ function calculatePriceAndDeadline(
 
 const countPrice = function (length, language) {
   let price;
-  if (language === "eng") {
-    if (length <= 1000) {
-      price = 120;
-    } else {
-      price = (length * 0.12).toFixed(2);
+  if (length > 0) {
+    if (language === "eng") {
+      if (length <= 1000) {
+        price = 120;
+      } else {
+        price = (length * 0.12).toFixed(2);
+      }
+    } else if (language === "rus" || "ua") {
+      if (length <= 1000) {
+        price = 50;
+      } else {
+        price = (length * 0.05).toFixed(2);
+      }
     }
-  } else if (language === "rus" || "ua") {
-    if (length <= 1000) {
-      price = 50;
-    } else {
-      price = (length * 0.05).toFixed(2);
-    }
+  } else {
+    price = 0;
   }
   return price;
 };
@@ -64,6 +68,8 @@ const countDeadline = function (length, language) {
     } else {
       time = (0.5 + length / 1333).toFixed(0);
     }
+  } else {
+    time = 0;
   }
   return time;
 };
@@ -73,26 +79,33 @@ const findDeadline = function (day, month, hours, minutes, time) {
   console.log(startDate.format("MMMM DD ddd, h:mm:ss a"));
   let currentHours = parseInt(startDate.format("HH"), 10);
   let currentDay = startDate.format("ddd");
-  for (let i = 0; i < time; i++) {
+  console.log(time);
+  for (let i = 1; i <= time; i++) {
     currentHours = parseInt(startDate.format("HH"), 10);
     currentDay = startDate.format("ddd");
-    console.log(startDate.format("HH"));
-    if (currentHours >= 19) {
-      startDate.add(15 - (currentHours - 19), "hours");
-    } else if (currentDay === "Sat") {
-      currentHours = 10;
-      startDate.add(2, "days");
-    } else if (currentDay === "Sun") {
-      currentHours = 10;
-      startDate.add(1, "days");
+    if (
+      currentHours >= 19 &&
+      currentDay != "Sat" &&
+      currentDay != "Sun" &&
+      currentDay != "Fri"
+    ) {
+      startDate.add(15 - (currentHours - 19) + 1, "hours");
+    } else if (currentDay === "Sat" && currentHours <= 19) {
+      startDate.add(48 - (currentHours - 10) + 1, "hours");
+    } else if (currentDay === "Fri" && currentHours >= 19) {
+      startDate.add(72 - (currentHours - 10) + 1, "hours");
+    } else if (currentDay === "Fri" && currentHours >= 18) {
+      startDate.add(72 - (currentHours - 10), "hours");
+    } else if (currentDay === "Sun" && currentHours <= 19) {
+      startDate.add(24 - (currentHours - 10) + 1, "hours");
     } else {
       startDate.add(1, "hours");
     }
   }
-  const deadlineDate = startDate;
+  const deadlineDate = startDate.format("MMMM DD ddd, [at] HH:mm");
   return deadlineDate;
 };
 
-calculatePriceAndDeadline(5, 6, 20, 0, 2000, "eng", "rtf");
+calculatePriceAndDeadline(7, 6, 12, 15, 5100, "eng", "rtf");
 
 module.exports = calculatePriceAndDeadline;
