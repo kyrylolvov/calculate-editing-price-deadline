@@ -2,21 +2,34 @@
 
 var moment = require("moment"); // require
 
-function calculatePriceAndDeadline(length, language, format) {
+function calculatePriceAndDeadline(
+  day,
+  month,
+  hours,
+  minutes,
+  length,
+  language,
+  format
+) {
   let output = "";
   if (format === "doc" || format === "rtf" || format === "docx") {
-    // console.log(`The price is ${countPrice(length, language) * 1}₴`);
-    // output = `The price is ${countPrice(length, language) * 1}₴`
     const time = countDeadline(length, language);
-    const deadlineDate = findDeadline(1, 6, 10, 0, time);
-    console.log(deadlineDate.format("MMMM DD ddd, HH:mm a"));
-  } else {
-    // console.log(`The price is ${countPrice(length, language) * 1.2}₴`);
-    // output = `The price is ${countPrice(length, language) * 1.2}₴`
-    const time = countDeadline(length, language) * 1.2;
     console.log(time);
+    const deadlineDate = findDeadline(day, month, hours, minutes, time);
+    output = `The price is ${
+      countPrice(length, language) * 1
+    }₴. Deadline is on ${deadlineDate.format("MMMM DD ddd, [at] HH:mm a")}`;
+    console.log(output);
+  } else {
+    const time = (countDeadline(length, language) * 1.2).toFixed(0);
+    console.log(time);
+    const deadlineDate = findDeadline(day, month, hours, minutes, time);
+    output = `The price is ${
+      countPrice(length, language) * 1.2
+    }₴. Deadline is on ${deadlineDate.format("MMMM DD ddd, [at] HH:mm a")}`;
+    console.log(output);
   }
-  // return output;
+  return output;
 }
 
 const countPrice = function (length, language) {
@@ -60,9 +73,10 @@ const findDeadline = function (day, month, hours, minutes, time) {
   console.log(startDate.format("MMMM DD ddd, h:mm:ss a"));
   let currentHours = parseInt(startDate.format("HH"), 10);
   let currentDay = startDate.format("ddd");
-  for (let i = 1; i <= time; i++) {
+  for (let i = 0; i < time; i++) {
     currentHours = parseInt(startDate.format("HH"), 10);
     currentDay = startDate.format("ddd");
+    console.log(startDate.format("HH"));
     if (currentHours >= 19) {
       startDate.add(15 - (currentHours - 19), "hours");
     } else if (currentDay === "Sat") {
@@ -79,12 +93,6 @@ const findDeadline = function (day, month, hours, minutes, time) {
   return deadlineDate;
 };
 
-calculatePriceAndDeadline(2000, "eng", "rtf");
-// console.log(moment().format());
-
-// const deadline = moment([2021, 4, 31, 21]).add(5.8, 'h');
-// console.log(deadline.format('MMMM Do YYYY, h:mm:ss a'));
-
-// findDeadline(30, 5, 17, 30, 5);
+calculatePriceAndDeadline(5, 6, 20, 0, 2000, "eng", "rtf");
 
 module.exports = calculatePriceAndDeadline;
